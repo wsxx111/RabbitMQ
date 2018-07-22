@@ -18,14 +18,14 @@ namespace Framework.RabbitMq
     {
         #region 初始化
         //RabbitMQ建议客户端线程之间不要共用Model，至少要保证共用Model的线程发送消息必须是串行的，但是建议尽量共用Connection。
-        private static readonly ConcurrentDictionary<string, IModel> ModelDic =
+        public static readonly ConcurrentDictionary<string, IModel> ModelDic =
             new ConcurrentDictionary<string, IModel>();
 
         private static RabbitMqAttribute _rabbitMqAttribute;
 
         private const string RabbitMqAttribute = "RabbitMqAttribute";
 
-        private static IConnection _conn;
+        private static IConnection _conn;        
 
         private static readonly object LockObj = new object();
 
@@ -139,7 +139,7 @@ namespace Framework.RabbitMq
         /// <param name="routingKey"></param>
         /// <param name="isProperties">是否持久化</param>
         /// <returns></returns>
-        private static IModel GetModel(string exchange, string queue, string routingKey, bool isProperties = false)
+        public static IModel GetModel(string exchange, string queue, string routingKey, bool isProperties = false)
         {
             return ModelDic.GetOrAdd(queue, key =>
               {
@@ -166,7 +166,7 @@ namespace Framework.RabbitMq
                  QueueDeclare(model, queue, isProperties);
                  if (exchange!=""&& routingKey != "")
                  {
-                    model.QueueBind(queue, exchange, routingKey);
+                    model.QueueBind(queue, exchange, routingKey);                    
                  }              
 
                  //每次消费的消息数
@@ -286,7 +286,7 @@ namespace Framework.RabbitMq
         public void Subscribe<T>(string queue, bool isProperties, Action<T> handler, bool isDeadLetter) where T : class
         {
             //队列声明
-            var channel = GetModel(queue, isProperties);
+            var channel = GetModel(queue, isProperties, "Wk.ExchangeName", "Wk.ExchangeName");
 
             var consumer = new EventingBasicConsumer(channel);
             consumer.Received += (model, ea) =>
@@ -503,6 +503,7 @@ namespace Framework.RabbitMq
         {
             foreach (var item in ModelDic)
             {
+                item.Value.QueueDelete("WK.QueueName.Monitor");
                 item.Value.Dispose();
             }
             _conn.Dispose();

@@ -13,6 +13,11 @@ namespace FrameWork.RabbitMq.MsgMonitor
             Console.WriteLine("监控启动");
             var app =new MainService();
             app.Start();
+            int dd = 0;
+            while (Console.ReadKey().KeyChar == 's')
+            {
+                app.Stop();              
+            }
 
             Console.Read();
         }

@@ -12,7 +12,7 @@ namespace FrameWork.RabbitMq.MsgMonitor
 {
     public class MainService
     {
-        private readonly RabbitMqService _rabbitMqProxy;
+        public readonly RabbitMqService _rabbitMqProxy;
         public MainService()
         {
             _rabbitMqProxy = new RabbitMqService(new MqConfig
@@ -38,8 +38,8 @@ namespace FrameWork.RabbitMq.MsgMonitor
         }
 
         public bool Stop()
-        {
-            _rabbitMqProxy.Dispose();
+        {          
+            _rabbitMqProxy.Dispose();          
             return true;
         }
     }
